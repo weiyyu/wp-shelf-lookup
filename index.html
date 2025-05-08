@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WP架號查詢系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- 你的 CSS 完全保留 --- */
+        :root {
+            --primary-color: #2C4A3E;
+            --secondary-color: #1A2F26;
+            --accent-color: #4A7B6A;
+            --background-color: #F5F6F7;
+            --card-background: #ffffff;
+            --text-color: #2C3E50;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--background-color);
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(44, 74, 62, 0.1);
+            box-sizing: border-box;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 24px;
+            font-size: 36px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 10px;
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.8);
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+
+        .form-group { margin-bottom: 24px; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--primary-color);
+            font-size: 16px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 16px 10px;
+            border: 2px solid #E0E4E7;
+            border-radius: var(--border-radius);
+            font-size: 18px;
+            transition: var(--transition);
+            background-color: var(--card-background);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(74, 123, 106, 0.1);
+        }
+
+        .model-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .model-input { width: 100%; }
+
+        .shelf-display {
+            background: linear-gradient(135deg, #F8F9FA 0%, #F0F2F4 100%);
+            padding: 16px 10px;
+            border-radius: var(--border-radius);
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 500;
+            transition: var(--transition);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .shelf-display.has-value {
+            background: linear-gradient(135deg, #E8F5F0 0%, #D4E9E0 100%);
+            color: var(--primary-color);
+            border: 1px solid rgba(74, 123, 106, 0.2);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 14px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            width: 100%;
+            margin-top: 20px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(44, 74, 62, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(44, 74, 62, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(44, 74, 62, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>WP架號查詢系統</h2>
+        <div class="form-group">
+            <label for="warehouse">選擇倉庫</label>
+            <select id="warehouse">
+                <option value="">請選擇倉庫</option>
+                <option value="main">總倉</option>
+                <option value="neijiang">內江</option>
+                <option value="kinmen">金門</option>
+                <option value="ximen">西門</option>
+                <option value="keelung">基隆</option>
+                <option value="yuanbai">遠百</option>
+            </select>
+        </div>
+
+        <div id="modelContainer">
+            <div class="model-row">
+                <input type="text" class="model-input" placeholder="請輸入型號">
+                <div class="shelf-display"></div>
+            </div>
+            <div class="model-row">
+                <input type="text" class="model-input" placeholder="請輸入型號">
+                <div class="shelf-display"></div>
+            </div>
+            <div class="model-row">
+                <input type="text" class="model-input" placeholder="請輸入型號">
+                <div class="shelf-display"></div>
+            </div>
+        </div>
+
+        <button onclick="clearInputs()">清除所有輸入</button>
+    </div>
+
+    <script>
+        function clearInputs() {
+            const inputs = document.querySelectorAll('.model-input');
+            const displays = document.querySelectorAll('.shelf-display');
+            inputs.forEach(input => input.value = '');
+            displays.forEach(display => {
+                display.textContent = '';
+                display.classList.remove('has-value');
+            });
+        }
+
+        const debounceTimers = [];
+
+        document.querySelectorAll('.model-input').forEach((input, index) => {
+            input.addEventListener('input', function() {
+                clearTimeout(debounceTimers[index]);
+                const display = this.nextElementSibling;
+                const warehouse = document.getElementById('warehouse').value;
+
+                if (!warehouse) {
+                    display.textContent = '請先選擇倉庫';
+                    display.classList.add('has-value');
+                    return;
+                }
+
+                const model = this.value.trim();
+                if (!model) {
+                    display.textContent = '';
+                    display.classList.remove('has-value');
+                    return;
+                }
+
+                debounceTimers[index] = setTimeout(() => {
+                    const apiUrl = `https://script.google.com/macros/s/AKfycbyW5DgxMiNrJZWF0zQnrglZ72J40h5ga2dIWYAMQjq96frfsigbLiwyUrNCiZ1EwYFDgg/exec?warehouse=${encodeURIComponent(warehouse)}&model=${encodeURIComponent(model)}`;
+
+                    fetch(apiUrl)
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success && result.shelf) {
+                                display.textContent = `架號: ${result.shelf}`;
+                                display.classList.add('has-value');
+                            } else if (result.success && result.shelf === null) {
+                                display.textContent = '沒有找到架號';
+                                display.classList.add('has-value');
+                            } else {
+                                display.textContent = '查詢失敗: ' + (result.error || '未知錯誤');
+                                display.classList.add('has-value');
+                            }
+                        })
+                        .catch(err => {
+                            display.textContent = '連線錯誤';
+                            display.classList.add('has-value');
+                        });
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html>
